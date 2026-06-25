@@ -1,6 +1,6 @@
 # 🛠️ MCP-Go — Multi-Tool MCP Server
 
-A feature-rich [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server built in Go, providing **20 utility tools** for AI assistants like Claude, Gemini, and others.
+A feature-rich [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server built in Go, providing **23 utility tools** for AI assistants like Claude, Gemini, and others.
 
 ## ✨ Features
 
@@ -11,6 +11,7 @@ A feature-rich [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) 
 | 🌐 **HTTP Client** | `http_get`, `http_post_json` | Make HTTP requests to external APIs |
 | 🔧 **Data Utils** | `generate_hash`, `base64_encode`, `base64_decode`, `format_json`, `regex_match`, `word_count`, `text_transform`, `get_current_time` | Encoding, hashing, text processing |
 | 🔑 **Env Tools** | `get_env_var`, `list_env_vars`, `check_required_env_vars` | Environment variable management (auto-hides secrets) |
+| 🎬 **YouTube** | `get_youtube_info`, `get_youtube_transcript`, `list_youtube_languages` | Video metadata, transcripts & language listing |
 
 ---
 
@@ -125,7 +126,8 @@ mcp-go/
 │   ├── envtools/        # Environment variable tools
 │   ├── filesystem/      # File I/O operations
 │   ├── httpclient/      # HTTP GET/POST client
-│   └── sysinfo/         # System & memory info
+│   ├── sysinfo/         # System & memory info
+│   └── youtube/         # YouTube video info & transcripts
 ├── go.mod
 ├── go.sum
 ├── LICENSE
