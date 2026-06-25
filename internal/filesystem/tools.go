@@ -7,21 +7,21 @@ import (
 	"strings"
 )
 
-const maxReadSize = 1 * 1024 * 1024 // giới hạn đọc file: 1MB
+const maxReadSize = 1 * 1024 * 1024 // file read limit: 1 MB
 
-// ListDirectory liệt kê nội dung của một thư mục.
-// Ứng dụng thực tế: AI agent duyệt project source code, kiểm tra cấu trúc file.
+// ListDirectory lists the contents of a directory.
+// Practical uses: AI agents browsing project source code, checking file structure.
 func ListDirectory(path string) (string, error) {
 	entries, err := os.ReadDir(path)
 	if err != nil {
-		return "", fmt.Errorf("không thể đọc thư mục '%s': %w", path, err)
+		return "", fmt.Errorf("cannot read directory '%s': %w", path, err)
 	}
 
 	absPath, _ := filepath.Abs(path)
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Thư mục: %s\n", absPath))
+	sb.WriteString(fmt.Sprintf("Directory: %s\n", absPath))
 	sb.WriteString(strings.Repeat("─", 72) + "\n")
-	sb.WriteString(fmt.Sprintf("%-6s  %-40s  %10s  %s\n", "Loại", "Tên", "Kích thước", "Sửa đổi lần cuối"))
+	sb.WriteString(fmt.Sprintf("%-6s  %-40s  %10s  %s\n", "Type", "Name", "Size", "Last Modified"))
 	sb.WriteString(strings.Repeat("─", 72) + "\n")
 
 	dirCount, fileCount := 0, 0
@@ -45,58 +45,58 @@ func ListDirectory(path string) (string, error) {
 		))
 	}
 	sb.WriteString(strings.Repeat("─", 72) + "\n")
-	sb.WriteString(fmt.Sprintf("Tổng: %d file, %d thư mục", fileCount, dirCount))
+	sb.WriteString(fmt.Sprintf("Total: %d file(s), %d director(ies)", fileCount, dirCount))
 	return sb.String(), nil
 }
 
-// ReadFileContent đọc nội dung của một file văn bản (giới hạn 1MB).
-// Ứng dụng thực tế: AI đọc file config, source code, log để phân tích.
+// ReadFileContent reads the content of a text file (limit: 1 MB).
+// Practical uses: AI reading config files, source code, logs for analysis.
 func ReadFileContent(path string) (string, error) {
 	info, err := os.Stat(path)
 	if err != nil {
-		return "", fmt.Errorf("không tìm thấy file '%s': %w", path, err)
+		return "", fmt.Errorf("file not found '%s': %w", path, err)
 	}
 	if info.IsDir() {
-		return "", fmt.Errorf("'%s' là thư mục, không phải file", path)
+		return "", fmt.Errorf("'%s' is a directory, not a file", path)
 	}
 	if info.Size() > maxReadSize {
-		return "", fmt.Errorf("file quá lớn (%s), giới hạn đọc là 1MB", formatFileSize(info.Size()))
+		return "", fmt.Errorf("file too large (%s), read limit is 1 MB", formatFileSize(info.Size()))
 	}
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return "", fmt.Errorf("không thể đọc file: %w", err)
+		return "", fmt.Errorf("cannot read file: %w", err)
 	}
 	return string(data), nil
 }
 
-// WriteFileContent ghi nội dung vào một file (tạo mới nếu chưa tồn tại).
-// Ứng dụng thực tế: AI tạo file config, báo cáo, code snippet tự động.
+// WriteFileContent writes content to a file (creates it if it does not exist).
+// Practical uses: AI auto-generating config files, reports, and code snippets.
 func WriteFileContent(path, content string) (string, error) {
 	dir := filepath.Dir(path)
 	if err := os.MkdirAll(dir, 0755); err != nil {
-		return "", fmt.Errorf("không thể tạo thư mục '%s': %w", dir, err)
+		return "", fmt.Errorf("cannot create directory '%s': %w", dir, err)
 	}
 	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
-		return "", fmt.Errorf("không thể ghi file: %w", err)
+		return "", fmt.Errorf("cannot write file: %w", err)
 	}
 	absPath, _ := filepath.Abs(path)
-	return fmt.Sprintf("Đã ghi thành công!\nFile: %s\nKích thước: %s", absPath, formatFileSize(int64(len(content)))), nil
+	return fmt.Sprintf("Successfully written!\nFile: %s\nSize: %s", absPath, formatFileSize(int64(len(content)))), nil
 }
 
-// GetFileInfo trả về metadata của một file hoặc thư mục.
-// Ứng dụng thực tế: Kiểm tra file tồn tại, xác minh quyền truy cập trước khi xử lý.
+// GetFileInfo returns metadata for a file or directory.
+// Practical uses: checking file existence, verifying permissions before processing.
 func GetFileInfo(path string) (string, error) {
 	info, err := os.Stat(path)
 	if err != nil {
-		return "", fmt.Errorf("không tìm thấy '%s': %w", path, err)
+		return "", fmt.Errorf("not found '%s': %w", path, err)
 	}
 	absPath, _ := filepath.Abs(path)
 	label := "File"
 	if info.IsDir() {
-		label = "Thư mục"
+		label = "Directory"
 	}
 	return fmt.Sprintf(
-		"Thông tin: %s\n%s\nĐường dẫn tuyệt đối : %s\nLoại               : %s\nKích thước         : %s\nSửa đổi lần cuối   : %s\nQuyền truy cập     : %s",
+		"Info: %s\n%s\nAbsolute path  : %s\nType           : %s\nSize           : %s\nLast modified  : %s\nPermissions    : %s",
 		path,
 		strings.Repeat("─", 60),
 		absPath,
@@ -107,12 +107,12 @@ func GetFileInfo(path string) (string, error) {
 	), nil
 }
 
-// SearchInFile tìm kiếm chuỗi văn bản trong một file và trả về các dòng khớp.
-// Ứng dụng thực tế: Tìm lỗi trong log file, tìm config key trong file cấu hình.
+// SearchInFile searches for a text string in a file and returns matching lines.
+// Practical uses: finding errors in log files, locating config keys in config files.
 func SearchInFile(path, pattern string) (string, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return "", fmt.Errorf("không thể đọc file: %w", err)
+		return "", fmt.Errorf("cannot read file: %w", err)
 	}
 	lines := strings.Split(string(data), "\n")
 	patternLower := strings.ToLower(pattern)
@@ -120,14 +120,14 @@ func SearchInFile(path, pattern string) (string, error) {
 	var matches []string
 	for i, line := range lines {
 		if strings.Contains(strings.ToLower(line), patternLower) {
-			matches = append(matches, fmt.Sprintf("  Dòng %4d │ %s", i+1, line))
+			matches = append(matches, fmt.Sprintf("  Line %4d │ %s", i+1, line))
 		}
 	}
 	if len(matches) == 0 {
-		return fmt.Sprintf("Không tìm thấy '%s' trong file %s", pattern, path), nil
+		return fmt.Sprintf("No matches for '%s' in file %s", pattern, path), nil
 	}
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Tìm thấy %d kết quả cho '%s' trong %s:\n", len(matches), pattern, path))
+	sb.WriteString(fmt.Sprintf("Found %d match(es) for '%s' in %s:\n", len(matches), pattern, path))
 	sb.WriteString(strings.Repeat("─", 60) + "\n")
 	for _, m := range matches {
 		sb.WriteString(m + "\n")

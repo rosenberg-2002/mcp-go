@@ -5,7 +5,7 @@ import (
 	"runtime"
 )
 
-// GetMemoryStats trả về thông tin sử dụng RAM của tiến trình hiện tại
+// GetMemoryStats returns RAM usage statistics for the current process.
 func GetMemoryStats() string {
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)

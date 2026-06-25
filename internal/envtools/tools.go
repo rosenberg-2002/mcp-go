@@ -7,31 +7,31 @@ import (
 	"strings"
 )
 
-// sensitiveKeywords là các từ khóa nhận diện biến môi trường nhạy cảm.
+// sensitiveKeywords are keywords used to identify sensitive environment variables.
 var sensitiveKeywords = []string{
 	"PASSWORD", "PASSWD", "SECRET", "TOKEN", "KEY",
 	"CREDENTIAL", "AUTH", "PRIVATE", "API_KEY", "APIKEY",
 }
 
-// GetEnvVar lấy giá trị của một biến môi trường cụ thể.
-// Ứng dụng thực tế: Kiểm tra cấu hình runtime (DB_HOST, PORT, SERVICE_URL).
+// GetEnvVar returns the value of a specific environment variable.
+// Practical uses: checking runtime configuration (DB_HOST, PORT, SERVICE_URL).
 func GetEnvVar(name string) string {
 	value, exists := os.LookupEnv(name)
 	if !exists {
-		return fmt.Sprintf("Biến môi trường '%s' không tồn tại", name)
+		return fmt.Sprintf("Environment variable '%s' does not exist", name)
 	}
 	if value == "" {
-		return fmt.Sprintf("Biến môi trường '%s' tồn tại nhưng có giá trị rỗng", name)
+		return fmt.Sprintf("Environment variable '%s' exists but is empty", name)
 	}
-	// Ẩn các giá trị nhạy cảm
+	// Mask sensitive values
 	if isSensitiveKey(name) {
-		return fmt.Sprintf("%s = ******* (ẩn vì chứa thông tin nhạy cảm)", name)
+		return fmt.Sprintf("%s = ******* (masked: sensitive key)", name)
 	}
 	return fmt.Sprintf("%s = %s", name, value)
 }
 
-// ListEnvVars liệt kê các biến môi trường theo prefix, ẩn giá trị nhạy cảm.
-// Ứng dụng thực tế: Kiểm tra toàn bộ cấu hình môi trường khi debug deployment.
+// ListEnvVars lists environment variables by prefix, masking sensitive values.
+// Practical uses: checking all environment configuration when debugging a deployment.
 func ListEnvVars(prefix string) string {
 	all := os.Environ()
 	sort.Strings(all)
@@ -48,7 +48,7 @@ func ListEnvVars(prefix string) string {
 		}
 		key, val := parts[0], parts[1]
 		if isSensitiveKey(key) {
-			matches = append(matches, fmt.Sprintf("  %s=******* (ẩn)", key))
+			matches = append(matches, fmt.Sprintf("  %s=******* (masked)", key))
 		} else {
 			matches = append(matches, fmt.Sprintf("  %s=%s", key, val))
 		}
@@ -56,17 +56,17 @@ func ListEnvVars(prefix string) string {
 
 	if len(matches) == 0 {
 		if prefix == "" {
-			return "Không tìm thấy biến môi trường nào"
+			return "No environment variables found"
 		}
-		return fmt.Sprintf("Không tìm thấy biến môi trường nào bắt đầu bằng '%s'", prefix)
+		return fmt.Sprintf("No environment variables found with prefix '%s'", prefix)
 	}
 
 	label := prefix
 	if prefix == "" {
-		label = "(tất cả)"
+		label = "(all)"
 	}
 	return fmt.Sprintf(
-		"Biến môi trường (prefix: %s) — %d kết quả:\n%s\n%s",
+		"Environment variables (prefix: %s) — %d result(s):\n%s\n%s",
 		label, len(matches),
 		strings.Repeat("─", 60),
 		strings.Join(matches, "\n"),

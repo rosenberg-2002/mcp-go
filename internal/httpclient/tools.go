@@ -10,15 +10,15 @@ import (
 	"time"
 )
 
-// httpClient dùng chung với timeout 30 giây - thực hành tốt trong production.
+// httpClient is a shared client with a 30-second timeout — best practice in production.
 var httpClient = &http.Client{
 	Timeout: 30 * time.Second,
 }
 
 const maxResponseSize = 1 * 1024 * 1024 // 1MB
 
-// Get thực hiện HTTP GET request.
-// Ứng dụng thực tế: Gọi REST API nội bộ, lấy dữ liệu từ webhook, health check.
+// Get performs an HTTP GET request.
+// Practical uses: calling internal REST APIs, fetching data from webhooks, health checks.
 func Get(rawURL string) (string, error) {
 	if err := validateURL(rawURL); err != nil {
 		return "", err
@@ -32,7 +32,7 @@ func Get(rawURL string) (string, error) {
 
 	body, err := io.ReadAll(io.LimitReader(resp.Body, maxResponseSize))
 	if err != nil {
-		return "", fmt.Errorf("không thể đọc response body: %w", err)
+		return "", fmt.Errorf("cannot read response body: %w", err)
 	}
 
 	var sb strings.Builder
@@ -46,8 +46,8 @@ func Get(rawURL string) (string, error) {
 	return sb.String(), nil
 }
 
-// PostJSON thực hiện HTTP POST với body JSON.
-// Ứng dụng thực tế: Gửi dữ liệu đến API, trigger webhook, tạo resource qua REST.
+// PostJSON performs an HTTP POST with a JSON body.
+// Practical uses: sending data to APIs, triggering webhooks, creating resources via REST.
 func PostJSON(rawURL, jsonBody string) (string, error) {
 	if err := validateURL(rawURL); err != nil {
 		return "", err
@@ -55,20 +55,20 @@ func PostJSON(rawURL, jsonBody string) (string, error) {
 
 	req, err := http.NewRequest(http.MethodPost, rawURL, bytes.NewBufferString(jsonBody))
 	if err != nil {
-		return "", fmt.Errorf("không thể tạo request: %w", err)
+		return "", fmt.Errorf("cannot create request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("request thất bại: %w", err)
+		return "", fmt.Errorf("request failed: %w", err)
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(io.LimitReader(resp.Body, maxResponseSize))
 	if err != nil {
-		return "", fmt.Errorf("không thể đọc response body: %w", err)
+		return "", fmt.Errorf("cannot read response body: %w", err)
 	}
 
 	var sb strings.Builder
@@ -83,17 +83,17 @@ func PostJSON(rawURL, jsonBody string) (string, error) {
 	return sb.String(), nil
 }
 
-// validateURL kiểm tra URL hợp lệ và chỉ cho phép http/https (chống SSRF).
+// validateURL validates the URL and only allows http/https (prevents SSRF).
 func validateURL(rawURL string) error {
 	u, err := url.Parse(rawURL)
 	if err != nil {
-		return fmt.Errorf("URL không hợp lệ: %w", err)
+		return fmt.Errorf("invalid URL: %w", err)
 	}
 	if u.Scheme != "http" && u.Scheme != "https" {
-		return fmt.Errorf("chỉ hỗ trợ giao thức http và https, nhận được: '%s'", u.Scheme)
+		return fmt.Errorf("only http and https protocols are supported, got: '%s'", u.Scheme)
 	}
 	if u.Host == "" {
-		return fmt.Errorf("URL thiếu host")
+		return fmt.Errorf("URL is missing host")
 	}
 	return nil
 }

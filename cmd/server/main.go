@@ -9,14 +9,14 @@ import (
 )
 
 func main() {
-	// Khởi tạo server
-	s := server.NewMCPServer("SysInfoManager", "1.0.0")
+	// Initialize the MCP server
+	s := server.NewMCPServer("mcp-go", "1.0.0")
 
-	// Ủy quyền việc đăng ký Tools cho package handlers
+	// Delegate tool registration to the handlers package
 	handlers.RegisterTools(s)
 
-	// Lắng nghe I/O
+	// Start listening on stdio
 	if err := server.ServeStdio(s); err != nil {
-		fmt.Printf("Lỗi khởi chạy server: %v\n", err)
+		fmt.Printf("Server startup error: %v\n", err)
 	}
 }
